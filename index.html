@@ -611,7 +611,7 @@ async function loadMyPlaylists() {
   clearTracks();
   try {
     let items = [];
-    let url = '/me/playlists';
+    let url = '/users/31gwqp3b5fyoqid565f2ry5clncy/playlists';
     let params = { limit: 50 };
     while (url) {
       const data = await api(url.startsWith('/') ? url : url.replace('https://api.spotify.com/v1',''), params);
@@ -622,11 +622,7 @@ async function loadMyPlaylists() {
     renderPlaylists(items.filter(Boolean));
     setStatus('');
   } catch(e) {
-    if (e.message.includes('403')) {
-      setStatus(`Permission denied. Your token may be outdated — please <a href="#" onclick="logout();return false;" style="color:var(--green)">log out</a> and reconnect to refresh permissions.`, 'error');
-    } else {
-      setStatus('Error: ' + e.message, 'error');
-    }
+    setStatus('Error: ' + e.message, 'error');
   }
 }
 
