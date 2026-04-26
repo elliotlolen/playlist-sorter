@@ -590,8 +590,10 @@ async function api(path, params = {}) {
   Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v));
   const res = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
   if (!res.ok) {
-    if (res.status === 401) { logout(); throw new Error('Token expired, please reconnect.'); }
-    throw new Error(`Spotify error: ${res.status}`);
+    if (res.status === 401) { logout(); throw new Error('Token expired — please reconnect.'); }
+    let msg = `Spotify error ${res.status}`;
+    try { const j = await res.json(); msg += ': ' + (j.error?.message || JSON.stringify(j)); } catch(e) {}
+    throw new Error(msg);
   }
   return res.json();
 }
@@ -620,7 +622,11 @@ async function loadMyPlaylists() {
     renderPlaylists(items.filter(Boolean));
     setStatus('');
   } catch(e) {
-    setStatus('Error: ' + e.message, 'error');
+    if (e.message.includes('403')) {
+      setStatus(`Permission denied. Your token may be outdated — please <a href="#" onclick="logout();return false;" style="color:var(--green)">log out</a> and reconnect to refresh permissions.`, 'error');
+    } else {
+      setStatus('Error: ' + e.message, 'error');
+    }
   }
 }
 
